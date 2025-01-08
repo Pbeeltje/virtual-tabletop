@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Upload } from 'lucide-react'
 
 export default function MainContent() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
@@ -41,27 +42,33 @@ export default function MainContent() {
           </div>
         )}
       </div>
-      <div className="p-4 bg-gray-100 border-t">
-        <Input
+      <div className="p-2 bg-gray-100 border-t flex items-center justify-between h-14">
+        <Button variant="ghost" size="icon" onClick={() => document.getElementById('file-upload')?.click()}>
+          <Upload className="h-4 w-4" />
+          <span className="sr-only">Upload image</span>
+        </Button>
+        <input
+          id="file-upload"
           type="file"
           accept="image/*"
           onChange={handleImageUpload}
-          className="mb-4"
+          className="hidden"
         />
-        <ScrollArea className="h-24">
+        <ScrollArea className="h-10 flex-grow mx-2">
           <div className="flex space-x-2">
             {uploadedImages.map((image, index) => (
               <Button
                 key={index}
                 variant="outline"
+                size="icon"
                 onClick={() => setSelectedImage(image)}
                 className="p-1"
               >
                 <Image
                   src={image}
                   alt={`Uploaded image ${index + 1}`}
-                  width={50}
-                  height={50}
+                  width={24}
+                  height={24}
                   objectFit="cover"
                 />
               </Button>
