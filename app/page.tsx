@@ -1,5 +1,3 @@
-'use client'
-
 import { useState } from 'react'
 import MainContent from './components/MainContent'
 import RightSideMenu from './components/RightSideMenu'
@@ -36,8 +34,6 @@ export default function Home() {
   const handleDiceRoll = (sides: number, result: number) => {
     addMessage('system', `${user} rolled a d${sides}: <b>${result}</b>`, 'System')
   }
-
-  
 
   const handleLogin = (username: string) => {
     setUser(username)
