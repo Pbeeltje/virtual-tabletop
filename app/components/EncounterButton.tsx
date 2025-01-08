@@ -27,7 +27,7 @@ export default function EncounterButton({ onPhaseChange }: EncounterButtonProps)
 
   const resetEncounter = () => {
     setPhase('Encounter')
-    onPhaseChange('Encounter', 'bg-white')
+    onPhaseChange('It\'s over', 'bg-white')
   }
 
   // Determine text color based on phase
