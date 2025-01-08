@@ -23,11 +23,13 @@ interface RightSideMenuProps {
   user: string
   users: string[]
   chatBackgroundColor: string
+  onPhaseChange: (phase: string, color: string) => void;
 }
 
-export default function RightSideMenu({ messages, addMessage, user, users, chatBackgroundColor }: RightSideMenuProps) {
+export default function RightSideMenu({ messages, addMessage, user, users, chatBackgroundColor: initialChatBackgroundColor }: RightSideMenuProps) {
   const [inputMessage, setInputMessage] = useState('')
   const scrollAreaRef = useRef<HTMLDivElement>(null)
+  const [chatBackgroundColor, setChatBackgroundColor] = useState(initialChatBackgroundColor); // Or default color
 
   const handleSendMessage = () => {
     if (inputMessage.trim()) {
@@ -41,6 +43,15 @@ export default function RightSideMenu({ messages, addMessage, user, users, chatB
       scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight
     }
   }, [messages])
+
+  const handlePhaseChange = (phase: string, color: string) => {
+    // Add message to chat
+    addMessage('system', `${phase} phase`, 'System'); // 'System' is used here as the username for system messages
+    
+    // Change background color
+    // Note: This might not be the best place to change background color directly; consider using state or context for this
+    setChatBackgroundColor(color); // This assumes you have a state setter for chatBackgroundColor
+  };
 
   return (
     <div className="w-64 flex flex-col bg-gray-100 border-l">

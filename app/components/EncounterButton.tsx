@@ -22,10 +22,7 @@ export default function EncounterButton({ onPhaseChange }: EncounterButtonProps)
     const nextIndex = (currentIndex + 1) % phases.length
     const nextPhase = phases[nextIndex]
     setPhase(nextPhase.name)
-    onPhaseChange(nextPhase.name, nextPhase.color)
-    if (nextPhase.name === 'Prepare') {
-      onPhaseChange('NEW TURN', nextPhase.color)
-    }
+    onPhaseChange(nextPhase.name + ' phase', nextPhase.color)
   }
 
   const resetEncounter = () => {
@@ -33,11 +30,14 @@ export default function EncounterButton({ onPhaseChange }: EncounterButtonProps)
     onPhaseChange('Encounter', 'bg-white')
   }
 
+  // Determine text color based on phase
+  const textColor = phase === 'Encounter' ? 'text-white' : 'text-black';
+
   return (
     <div className="flex items-center">
       <Button
         onClick={handleClick}
-        className={`w-24 ${phase !== 'Encounter' ? phases.find(p => p.name === phase)?.color : ''}`}
+        className={`w-24 ${phase !== 'Encounter' ? phases.find(p => p.name === phase)?.color : 'bg-black'} ${textColor} hover:bg-black hover:text-white`}
       >
         {phase}
       </Button>
@@ -49,4 +49,3 @@ export default function EncounterButton({ onPhaseChange }: EncounterButtonProps)
     </div>
   )
 }
-
