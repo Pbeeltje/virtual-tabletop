@@ -1,3 +1,5 @@
+'use client'
+
 import { useState } from 'react'
 import MainContent from './components/MainContent'
 import RightSideMenu from './components/RightSideMenu'
