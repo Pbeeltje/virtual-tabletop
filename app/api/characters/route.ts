@@ -32,6 +32,10 @@ export async function POST(request: Request) {
     })
     const newCharacterId = result.lastInsertRowid
 
+    if (newCharacterId === undefined) {
+      throw new Error('Failed to retrieve new character ID')
+    }
+
     const newCharacter = await client.execute({
       sql: 'SELECT * FROM Character WHERE CharacterId = ?',
       args: [newCharacterId]

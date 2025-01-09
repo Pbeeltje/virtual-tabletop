@@ -18,15 +18,8 @@ interface ChatMessage {
 export default function Home() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [user, setUser] = useState<string | null>(null)
-  const [chatBackgroundColor, setChatBackgroundColor] = useState('white');
-
-  const onPhaseChange = (phase: string, color: string) => {
-    if(phase != '') 
-    {
-        setMessages(prevMessages => [...prevMessages, { type: 'system', content: `${phase}`, timestamp: new Date().toLocaleTimeString(), username: 'System' }]);
-    }
-    setChatBackgroundColor(color); // This will change the background color dynamically
-  };
+  const [users, setUsers] = useState<string[]>([])
+  const [chatBackgroundColor, setChatBackgroundColor] = useState('bg-white')
 
   const addMessage = (type: MessageType, content: string, username: string) => {
     const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
@@ -39,7 +32,13 @@ export default function Home() {
 
   const handleLogin = (username: string) => {
     setUser(username)
+    setUsers(prevUsers => [...prevUsers, username])
     addMessage('system', `${username} has joined the game.`, 'System')
+  }
+
+  const handlePhaseChange = (phase: string, color: string) => {
+    setChatBackgroundColor(color)
+    addMessage('system', `${phase} phase`, 'System')
   }
 
   if (!user) {
@@ -60,18 +59,14 @@ export default function Home() {
           <MainContent />
         </div>
         <RightSideMenu 
-  messages={messages} 
-  addMessage={addMessage} 
-  user={user} 
-  users={[]} 
-  chatBackgroundColor={chatBackgroundColor} // Use state here
-  onPhaseChange={onPhaseChange} 
-/>
+          messages={messages} 
+          addMessage={addMessage} 
+          user={user} 
+          users={users}
+          chatBackgroundColor={chatBackgroundColor}
+        />
       </div>
-      <BottomBar 
-  onDiceRoll={handleDiceRoll} 
-  onPhaseChange={onPhaseChange} 
-/>
+      <BottomBar onDiceRoll={handleDiceRoll} onPhaseChange={handlePhaseChange} />
     </div>
   )
 }
