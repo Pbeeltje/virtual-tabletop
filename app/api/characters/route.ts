@@ -49,23 +49,26 @@ export async function POST(request: Request) {
 }
 
 export async function PUT(request: Request) {
-  const { CharacterId, ...updatedFields } = await request.json()
+  const { searchParams } = new URL(request.url)
+  const id = searchParams.get('id')
+  const updatedCharacter = await request.json()
+
+  if (!id) {
+    return NextResponse.json({ error: 'Character ID is required' }, { status: 400 })
+  }
 
   try {
-    const setClause = Object.keys(updatedFields).map(key => `${key} = ?`).join(', ')
-    const args = [...Object.values(updatedFields), CharacterId]
+    const setClause = Object.keys(updatedCharacter)
+      .map(key => `${key} = ?`)
+      .join(', ')
+    const values = Object.values(updatedCharacter)
 
     await client.execute({
       sql: `UPDATE Character SET ${setClause} WHERE CharacterId = ?`,
-      args
+      args: [...values, id],
     })
 
-    const updatedCharacter = await client.execute({
-      sql: 'SELECT * FROM Character WHERE CharacterId = ?',
-      args: [CharacterId]
-    })
-
-    return NextResponse.json(updatedCharacter.rows[0])
+    return NextResponse.json({ message: 'Character updated successfully' })
   } catch (error) {
     console.error('Error updating character:', error)
     return NextResponse.json({ error: 'Failed to update character' }, { status: 500 })

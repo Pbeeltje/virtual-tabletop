@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { toast } from "@/components/ui/use-toast"
 
 interface Character {
   CharacterId: number
@@ -57,11 +58,20 @@ export default function CharacterPopup({ character, onClose, onUpdate }: Charact
       })
       if (response.ok) {
         onUpdate(editedCharacter)
+        toast({
+          title: "Character Updated",
+          description: "Your changes have been saved successfully.",
+        })
       } else {
-        console.error('Failed to update character')
+        throw new Error('Failed to update character')
       }
     } catch (error) {
       console.error('Error updating character:', error)
+      toast({
+        title: "Error",
+        description: "Failed to update character. Please try again.",
+        variant: "destructive",
+      })
     }
   }
 
@@ -102,7 +112,34 @@ export default function CharacterPopup({ character, onClose, onUpdate }: Charact
                 onChange={handleInputChange}
                 placeholder="Level"
               />
-              {/* Add more inputs for other stats */}
+              <Input
+                name="Strength"
+                type="number"
+                value={editedCharacter.Strength}
+                onChange={handleInputChange}
+                placeholder="Strength"
+              />
+              <Input
+                name="Dexternity"
+                type="number"
+                value={editedCharacter.Dexternity}
+                onChange={handleInputChange}
+                placeholder="Dexterity"
+              />
+              <Input
+                name="Mind"
+                type="number"
+                value={editedCharacter.Mind}
+                onChange={handleInputChange}
+                placeholder="Mind"
+              />
+              <Input
+                name="Charisma"
+                type="number"
+                value={editedCharacter.Charisma}
+                onChange={handleInputChange}
+                placeholder="Charisma"
+              />
               <div className="flex justify-end space-x-2">
                 <Button type="button" variant="outline" onClick={onClose}>
                   Cancel
@@ -112,11 +149,9 @@ export default function CharacterPopup({ character, onClose, onUpdate }: Charact
             </form>
           </TabsContent>
           <TabsContent value="jobs">
-            {/* Add job-related fields here */}
             <p>Job information coming soon...</p>
           </TabsContent>
           <TabsContent value="inventory">
-            {/* Add inventory-related fields here */}
             <p>Inventory information coming soon...</p>
           </TabsContent>
         </Tabs>

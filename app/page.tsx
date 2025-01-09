@@ -38,7 +38,7 @@ export default function Home() {
 
   const handlePhaseChange = (phase: string, color: string) => {
     setChatBackgroundColor(color)
-    addMessage('system', `${phase} phase`, 'System')
+    addMessage('system', `${phase}`, 'System')
   }
 
   if (!user) {
@@ -62,7 +62,6 @@ export default function Home() {
           messages={messages} 
           addMessage={addMessage} 
           user={user} 
-          users={users}
           chatBackgroundColor={chatBackgroundColor}
         />
       </div>

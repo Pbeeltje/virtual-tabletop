@@ -5,7 +5,6 @@ import Link from 'next/link'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { X } from 'lucide-react'
 import CharacterList from './CharacterList'
 
@@ -22,14 +21,13 @@ interface RightSideMenuProps {
   messages: ChatMessage[]
   addMessage: (type: MessageType, content: string, username: string) => void
   user: string
-  users: string[]
   chatBackgroundColor: string
 }
 
-export default function RightSideMenu({ messages, addMessage, user, users, chatBackgroundColor }: RightSideMenuProps) {
+export default function RightSideMenu({ messages, addMessage, user, chatBackgroundColor }: RightSideMenuProps) {
   const [inputMessage, setInputMessage] = useState('')
   const scrollAreaRef = useRef<HTMLDivElement>(null)
-  const [isUsersOpen, setIsUsersOpen] = useState(false)
+  //const [isUsersOpen, setIsUsersOpen] = useState(false)
   const [activeSection, setActiveSection] = useState<'chat' | 'characters'>('chat')
 
   const handleSendMessage = () => {
@@ -53,17 +51,19 @@ export default function RightSideMenu({ messages, addMessage, user, users, chatB
             <Button
               variant="link"
               className="text-blue-600 hover:underline p-0"
-              onClick={() => setActiveSection('characters')}
+              onClick={() => setActiveSection(activeSection === 'characters' ? 'chat' : 'characters')}
             >
-              Characters
+              {activeSection === 'characters' ? 'Chat' : 'Characters'}
             </Button>
           </li>
           <li><Link href="#" className="text-blue-600 hover:underline">Maps</Link></li>
           <li><Link href="#" className="text-blue-600 hover:underline">Settings</Link></li>
-          <li>
+          {/*<li>
             <Popover open={isUsersOpen} onOpenChange={setIsUsersOpen}>
               <PopoverTrigger asChild>
-                <Button variant="link" className="text-blue-600 hover:underline p-0">Users</Button>
+                <Button variant="link" className="text-blue-600 hover:underline p-0">
+                  Users
+                </Button>
               </PopoverTrigger>
               <PopoverContent className="w-48">
                 <div className="flex justify-between items-center mb-2">
@@ -84,7 +84,7 @@ export default function RightSideMenu({ messages, addMessage, user, users, chatB
                 </ul>
               </PopoverContent>
             </Popover>
-          </li>
+          </li>*/}
         </ul>
       </nav>
       <div className="flex-grow flex flex-col overflow-hidden">
