@@ -1,102 +1,102 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import Image from 'next/image'
 import { Button } from "@/components/ui/button"
-import { Plus } from 'lucide-react'
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Plus, Trash2 } from 'lucide-react'
 import CharacterPopup from './CharacterPopup'
-
-interface Character {
-  CharacterId: number
-  Name: string
-  Description: string
-  Age: number
-  Level: number
-  Guard: number
-  Armor: number
-  MaxGuard: number
-  Strength: number
-  MaxStrength: number
-  Dexternity: number
-  MaxDexternity: number
-  Mind: number
-  MaxMind: number
-  Charisma: number
-  MaxCharisma: number
-  Skill: number
-  MaxSkill: number
-  Mp: number
-  MaxMp: number
-  InventoryId: number
-  JobId: number | null
-  Path: string
-  // Add other fields as needed
-}
+import { Character } from '../types/character'
 
 interface CharacterListProps {
-  category: 'Party' | 'NPC' | 'Monster'
+  categories: ('Party' | 'NPC' | 'Monster')[]
+  characters: Record<string, Character[]>
+  onAddCharacter: (category: string) => void
+  onUpdateCharacter: (updatedCharacter: Character) => void
+  onDeleteCharacter: (character: Character) => void
 }
 
-export default function CharacterList({ category }: CharacterListProps) {
-  const [characters, setCharacters] = useState<Character[]>([])
+export default function CharacterList({ categories, characters, onAddCharacter, onUpdateCharacter, onDeleteCharacter }: CharacterListProps) {
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null)
+  const [activeCategory, setActiveCategory] = useState<string>(categories[0])
 
-  useEffect(() => {
-    fetchCharacters()
-  }, [category])
-
-  const fetchCharacters = async () => {
-    try {
-      const response = await fetch(`/api/characters?category=${category}`)
-      const data = await response.json()
-      setCharacters(data)
-    } catch (error) {
-      console.error('Error fetching characters:', error)
-    }
-  }
-
-  const handleAddCharacter = async () => {
-    try {
-      const response = await fetch('/api/characters', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ category }),
-      })
-      const newCharacter = await response.json()
-      setCharacters([...characters, newCharacter])
-    } catch (error) {
-      console.error('Error adding character:', error)
+  const handleDeleteCharacter = (character: Character) => {
+    if (window.confirm(`Are you sure you want to delete ${character.Name}?`)) {
+      onDeleteCharacter(character)
     }
   }
 
   return (
-    <div>
-      <h2 className="text-lg font-semibold mb-2">{category}</h2>
-      <ul className="space-y-2">
-        {characters.map((character) => (
-          <li key={character.CharacterId} className="flex items-center justify-between">
-            <span>{character.Name}</span>
-            <Button variant="ghost" onClick={() => setSelectedCharacter(character)}>
-              View
-            </Button>
-          </li>
+    <Tabs value={activeCategory} onValueChange={setActiveCategory}>
+      <TabsList className="grid w-full grid-cols-3">
+        {categories.map((category) => (
+          <TabsTrigger key={category} value={category}>
+            {category}
+          </TabsTrigger>
         ))}
-      </ul>
-      <Button variant="outline" size="sm" className="mt-2" onClick={handleAddCharacter}>
-        <Plus className="w-4 h-4 mr-2" /> Add {category}
-      </Button>
+      </TabsList>
+      {categories.map((category) => (
+        <TabsContent key={category} value={category}>
+          <ScrollArea className="h-[calc(100vh-250px)] pr-4">
+            <ul className="space-y-2">
+              {(characters[category] || []).map((character) => (
+                <li key={character.CharacterId} className="flex items-center justify-between p-2 bg-white rounded-lg shadow">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 bg-gray-200 rounded-full overflow-hidden">
+                      {character.PortraitUrl ? (
+                        <Image
+                          src={character.PortraitUrl || "/placeholder.svg"}
+                          alt={`Portrait of ${character.Name}`}
+                          width={48}
+                          height={48}
+                          objectFit="cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                          No Image
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      className="text-left hover:underline"
+                      onClick={() => setSelectedCharacter(character)}
+                    >
+                      {character.Name}
+                    </button>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleDeleteCharacter(character)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </li>
+              ))}
+            </ul>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="mt-4" 
+              onClick={() => onAddCharacter(category)}
+            >
+              <Plus className="w-4 h-4 mr-2" /> Add {category}
+            </Button>
+          </ScrollArea>
+        </TabsContent>
+      ))}
       {selectedCharacter && (
         <CharacterPopup
           character={selectedCharacter}
           onClose={() => setSelectedCharacter(null)}
           onUpdate={(updatedCharacter) => {
-            setCharacters(characters.map(c => c.CharacterId === updatedCharacter.CharacterId ? updatedCharacter : c))
+            onUpdateCharacter(updatedCharacter)
             setSelectedCharacter(null)
           }}
         />
       )}
-    </div>
+    </Tabs>
   )
 }
 

@@ -4,9 +4,10 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { ScrollArea } from "@/components/ui/scroll-area"
+// import { ScrollArea } from "@/components/ui/scroll-area" // Removed ScrollArea import
 import { X } from 'lucide-react'
 import CharacterList from './CharacterList'
+import { toast } from "@/components/ui/use-toast"
 
 type MessageType = 'user' | 'system'
 
@@ -17,17 +18,39 @@ interface ChatMessage {
   username: string
 }
 
+interface Character {
+  CharacterId: number
+  Name: string
+  Description: string
+  Path: string
+  // Add other fields as needed
+}
+
 interface RightSideMenuProps {
   messages: ChatMessage[]
   addMessage: (type: MessageType, content: string, username: string) => void
   user: string
   chatBackgroundColor: string
+  characters: Record<string, Character[]>
+  onAddCharacter: (category: string) => void
+  onUpdateCharacter: (updatedCharacter: Character) => void
+  onDeleteCharacter: (character: Character) => void
+  onLogout: () => void
 }
 
-export default function RightSideMenu({ messages, addMessage, user, chatBackgroundColor }: RightSideMenuProps) {
+export default function RightSideMenu({ 
+  messages, 
+  addMessage, 
+  user,
+  chatBackgroundColor,
+  characters,
+  onAddCharacter,
+  onUpdateCharacter,
+  onDeleteCharacter,
+  onLogout
+}: RightSideMenuProps) {
   const [inputMessage, setInputMessage] = useState('')
-  const scrollAreaRef = useRef<HTMLDivElement>(null)
-  //const [isUsersOpen, setIsUsersOpen] = useState(false)
+  const chatContainerRef = useRef<HTMLDivElement>(null)
   const [activeSection, setActiveSection] = useState<'chat' | 'characters'>('chat')
 
   const handleSendMessage = () => {
@@ -38,10 +61,28 @@ export default function RightSideMenu({ messages, addMessage, user, chatBackgrou
   }
 
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
-  }, [messages])
+  }, [messages]);
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('/api/logout', { method: 'POST' })
+      if (response.ok) {
+        onLogout()
+      } else {
+        throw new Error('Logout failed')
+      }
+    } catch (error) {
+      console.error('Logout error:', error)
+      toast({
+        title: "Logout Failed",
+        description: "An error occurred during logout. Please try again.",
+        variant: "destructive",
+      })
+    }
+  }
 
   return (
     <div className="w-64 flex flex-col bg-gray-100 border-l">
@@ -58,40 +99,25 @@ export default function RightSideMenu({ messages, addMessage, user, chatBackgrou
           </li>
           <li><Link href="#" className="text-blue-600 hover:underline">Maps</Link></li>
           <li><Link href="#" className="text-blue-600 hover:underline">Settings</Link></li>
-          {/*<li>
-            <Popover open={isUsersOpen} onOpenChange={setIsUsersOpen}>
-              <PopoverTrigger asChild>
-                <Button variant="link" className="text-blue-600 hover:underline p-0">
-                  Users
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-48">
-                <div className="flex justify-between items-center mb-2">
-                  <h3 className="font-semibold">Online Users</h3>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-4 w-4 rounded-full" 
-                    onClick={() => setIsUsersOpen(false)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-                <ul>
-                  {users.map((user, index) => (
-                    <li key={index}>{user}</li>
-                  ))}
-                </ul>
-              </PopoverContent>
-            </Popover>
-          </li>*/}
+          <li>
+            <Button
+              variant="link"
+              className="text-blue-600 hover:underline p-0"
+              onClick={handleLogout}
+            >
+              Logout
+            </Button>
+          </li>
         </ul>
       </nav>
       <div className="flex-grow flex flex-col overflow-hidden">
         {activeSection === 'chat' ? (
           <>
             <h2 className="text-lg font-semibold p-4 pb-2">Chat</h2>
-            <ScrollArea className={`flex-grow px-4 ${chatBackgroundColor}`} ref={scrollAreaRef}>
+            <div 
+              ref={chatContainerRef}
+              className={`flex-grow px-4 ${chatBackgroundColor} overflow-y-auto`}
+            >
               <div className="space-y-2 pb-4">
                 {messages.map((message, index) => (
                   <div key={index}>
@@ -104,7 +130,7 @@ export default function RightSideMenu({ messages, addMessage, user, chatBackgrou
                   </div>
                 ))}
               </div>
-            </ScrollArea>
+            </div>
             <div className="p-2 border-t">
               <div className="flex h-10">
                 <Input
@@ -122,9 +148,13 @@ export default function RightSideMenu({ messages, addMessage, user, chatBackgrou
         ) : (
           <div className="p-4">
             <h2 className="text-lg font-semibold mb-4">Characters</h2>
-            <CharacterList category="Party" />
-            <CharacterList category="NPC" />
-            <CharacterList category="Monster" />
+            <CharacterList 
+              categories={['Party', 'NPC', 'Monster']}
+              characters={characters}
+              onAddCharacter={onAddCharacter}
+              onUpdateCharacter={onUpdateCharacter}
+              onDeleteCharacter={onDeleteCharacter}
+            />
           </div>
         )}
       </div>
